@@ -1,0 +1,21 @@
+{
+  "name": "Anita Gourmet Ventas",
+  "short_name": "Anita Gourmet",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#d63384",
+  "description": "Aplicación para el registro de ventas de Anita Gourmet.",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
