@@ -2,40 +2,43 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Ventas Anita Gourmet</title>
+  <title>Anita Gourmet - Ventas</title>
 
-  <!-- Ajustes para iPhone como app -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Anita Gourmet">
 
-  <!-- Conexión con manifest e íconos -->
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" href="icon-192.png" type="image/png">
 
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen p-6">
-  <div class="max-w-6xl mx-auto bg-white shadow-lg rounded-2xl p-6">
-    <h1 class="text-2xl font-bold text-center mb-6">📒 Anita Gourmet - Ventas</h1>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-xl p-6">
+    <h1 class="text-2xl font-bold text-center mb-4">📒 Anita Gourmet - Ventas</h1>
 
-    <!-- FORMULARIO DE VENTA -->
+    <!-- BOTONES ARRIBA -->
+    <div class="flex gap-4 mb-4">
+      <button id="btnImprimir" type="button" class="bg-green-600 text-white rounded p-2 hover:bg-green-700">🖨 Imprimir</button>
+      <button id="btnLimpiar" type="button" class="bg-red-600 text-white rounded p-2 hover:bg-red-700">🗑 Limpiar</button>
+    </div>
+
+    <!-- FORMULARIO -->
     <form id="ventaForm" class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
       <input id="cliente" type="text" placeholder="Cliente" class="border rounded p-2" required>
       <input id="producto" type="text" placeholder="Producto" class="border rounded p-2" required>
       <input id="cantidad" type="number" placeholder="Cantidad" min="1" class="border rounded p-2" required>
       <input id="precio" type="number" placeholder="Precio" min="0" step="0.01" class="border rounded p-2" required>
-      <button type="submit" class="bg-blue-600 text-white rounded p-2 hover:bg-blue-700">➕ Añadir Venta</button>
+      <button type="submit" class="bg-blue-600 text-white rounded p-2 hover:bg-blue-700">➕ Añadir</button>
     </form>
 
-    <!-- TABLA HISTORIAL -->
+    <!-- TABLA -->
     <div class="overflow-x-auto">
       <table class="w-full border-collapse">
         <thead>
-          <tr class="bg-gray-200 text-left">
+          <tr class="bg-gray-200">
             <th class="p-2 border">#</th>
             <th class="p-2 border">Cliente</th>
             <th class="p-2 border">Producto</th>
@@ -48,149 +51,105 @@
         <tbody id="tablaVentas"></tbody>
       </table>
     </div>
-
-    <!-- BOTONES -->
-    <div class="flex gap-4 mt-6">
-      <button id="btnImprimir" class="bg-green-600 text-white rounded p-2 hover:bg-green-700">🖨 Imprimir Reporte</button>
-      <button id="btnLimpiar" class="bg-red-600 text-white rounded p-2 hover:bg-red-700">🗑 Limpiar Ventas</button>
-    </div>
   </div>
 
-  <script>
-    let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
-    let editIndex = null;
+<script>
+  let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
+  let editIndex = null;
 
-    const form = document.getElementById("ventaForm");
-    const tabla = document.getElementById("tablaVentas");
-    const cliente = document.getElementById("cliente");
-    const producto = document.getElementById("producto");
-    const cantidad = document.getElementById("cantidad");
-    const precio = document.getElementById("precio");
+  const form = document.getElementById("ventaForm");
+  const tabla = document.getElementById("tablaVentas");
+  const cliente = document.getElementById("cliente");
+  const producto = document.getElementById("producto");
+  const cantidad = document.getElementById("cantidad");
+  const precio = document.getElementById("precio");
 
-    // Guardar en localStorage
-    function guardarDatos() {
-      localStorage.setItem("ventas", JSON.stringify(ventas));
+  function guardarDatos() {
+    localStorage.setItem("ventas", JSON.stringify(ventas));
+  }
+
+  function renderTabla() {
+    tabla.innerHTML = "";
+    ventas.forEach((v, index) => {
+      tabla.innerHTML += `
+        <tr>
+          <td class="p-2 border">${index+1}</td>
+          <td class="p-2 border">${v.cliente}</td>
+          <td class="p-2 border">${v.producto}</td>
+          <td class="p-2 border">${v.cantidad}</td>
+          <td class="p-2 border">$${parseFloat(v.precio).toFixed(2)}</td>
+          <td class="p-2 border">$${(v.cantidad*v.precio).toFixed(2)}</td>
+          <td class="p-2 border flex gap-2">
+            <button type="button" onclick="editar(${index})" class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600">✏</button>
+            <button type="button" onclick="eliminar(${index})" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">🗑</button>
+          </td>
+        </tr>`;
+    });
+  }
+
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const nueva = {
+      cliente: cliente.value,
+      producto: producto.value,
+      cantidad: parseInt(cantidad.value),
+      precio: parseFloat(precio.value)
+    };
+    if (editIndex !== null) {
+      ventas[editIndex] = nueva;
+      editIndex = null;
+    } else {
+      ventas.push(nueva);
     }
+    guardarDatos();
+    renderTabla();
+    form.reset();
+  });
 
-    // Renderizar tabla
-    function renderTabla() {
-      tabla.innerHTML = "";
-      ventas.forEach((v, index) => {
-        tabla.innerHTML += `
-          <tr>
-            <td class="p-2 border">${index + 1}</td>
-            <td class="p-2 border">${v.cliente}</td>
-            <td class="p-2 border">${v.producto}</td>
-            <td class="p-2 border">${v.cantidad}</td>
-            <td class="p-2 border">$${parseFloat(v.precio).toFixed(2)}</td>
-            <td class="p-2 border">$${(v.cantidad * v.precio).toFixed(2)}</td>
-            <td class="p-2 border flex gap-2">
-              <button onclick="editar(${index})" class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600">✏ Editar</button>
-              <button onclick="eliminar(${index})" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">🗑</button>
-            </td>
-          </tr>
-        `;
-      });
-    }
+  function editar(index) {
+    const v = ventas[index];
+    cliente.value = v.cliente;
+    producto.value = v.producto;
+    cantidad.value = v.cantidad;
+    precio.value = v.precio;
+    editIndex = index;
+    cliente.focus();
+  }
 
-    // Añadir/Editar venta
-    form.addEventListener("submit", e => {
-      e.preventDefault();
-      const nueva = {
-        cliente: cliente.value,
-        producto: producto.value,
-        cantidad: parseInt(cantidad.value),
-        precio: parseFloat(precio.value)
-      };
-
-      if (editIndex !== null) {
-        ventas[editIndex] = nueva;
-        editIndex = null;
-      } else {
-        ventas.push(nueva);
-      }
-
+  function eliminar(index) {
+    if(confirm("¿Eliminar esta venta?")) {
+      ventas.splice(index,1);
       guardarDatos();
       renderTabla();
-      form.reset();
-    });
-
-    // Editar
-    function editar(index) {
-      const v = ventas[index];
-      cliente.value = v.cliente;
-      producto.value = v.producto;
-      cantidad.value = v.cantidad;
-      precio.value = v.precio;
-      editIndex = index;
-      cliente.focus();
     }
+  }
 
-    // Eliminar
-    function eliminar(index) {
-      if (confirm("¿Seguro que deseas eliminar esta venta?")) {
-        ventas.splice(index, 1);
-        guardarDatos();
-        renderTabla();
-      }
+  document.getElementById("btnImprimir").addEventListener("click", ()=>{
+    const html = `
+    <html><head><meta charset="utf-8"><title>Reporte</title></head><body>
+    <h2>Reporte de Ventas</h2>
+    <table border="1" cellspacing="0" cellpadding="4">
+    <tr><th>#</th><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Total</th></tr>
+    ${ventas.map((v,i)=>`
+      <tr><td>${i+1}</td><td>${v.cliente}</td><td>${v.producto}</td><td>${v.cantidad}</td><td>$${v.precio.toFixed(2)}</td><td>$${(v.cantidad*v.precio).toFixed(2)}</td></tr>`).join("")}
+    </table></body></html>`;
+    const win = window.open("","_blank");
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(()=>win.print(),300);
+  });
+
+  document.getElementById("btnLimpiar").addEventListener("click", ()=>{
+    if(confirm("¿Limpiar todas las ventas?")) {
+      ventas=[];
+      guardarDatos();
+      renderTabla();
     }
+  });
 
-    // Imprimir (Safari iOS friendly)
-    document.getElementById("btnImprimir").addEventListener("click", () => {
-      const html = `
-        <html>
-          <head>
-            <meta charset="utf-8" />
-            <title>Reporte de Ventas</title>
-            <style>
-              body { font-family: -apple-system, Helvetica, Arial, sans-serif; padding: 20px; }
-              h2 { margin-top: 0; }
-              table { width: 100%; border-collapse: collapse; }
-              th, td { border: 1px solid #000; padding: 6px; font-size: 12px; }
-              th { background: #eee; }
-              @media print {
-                @page { size: A4; margin: 12mm; }
-              }
-            </style>
-          </head>
-          <body>
-            <h2>Reporte de Ventas</h2>
-            <table>
-              <tr><th>#</th><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Total</th></tr>
-              ${ventas.map((v, i) => `
-                <tr>
-                  <td>${i + 1}</td>
-                  <td>${v.cliente}</td>
-                  <td>${v.producto}</td>
-                  <td>${v.cantidad}</td>
-                  <td>$${v.precio.toFixed(2)}</td>
-                  <td>$${(v.cantidad * v.precio).toFixed(2)}</td>
-                </tr>
-              `).join("")}
-            </table>
-          </body>
-        </html>`;
+  renderTabla();
+</script>
 
-      const win = window.open("", "_blank");
-      win.document.open();
-      win.document.write(html);
-      win.document.close();
-      // En iOS es importante invocar print después de la carga
-      win.focus();
-      setTimeout(() => { win.print(); }, 300);
-    });
-
-    // Limpiar
-    document.getElementById("btnLimpiar").addEventListener("click", () => {
-      if (confirm("¿Seguro que deseas limpiar todas las ventas?")) {
-        ventas = [];
-        guardarDatos();
-        renderTabla();
-      }
-    });
-
-    // Inicializar
-    renderTabla();
-  </script>
 </body>
 </html>
