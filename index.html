@@ -1,13 +1,25 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Anita Maria - Gestión de Ventas</title>
-<!-- Incluye Tailwind CSS para un diseño moderno y responsivo -->
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
+    <meta charset="utf-8"/>
+    <title>Anita Maria - Gestión de Ventas</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta name="theme-color" content="#4f46e5">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Anita Gourmet">
+    
+    <link rel="manifest" href="manifest.json">
+    
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    
+    <link rel="icon" href="icon-192.png" type="image/png">
+    <style>
         body { font-family: 'Inter', sans-serif; }
         /* Estilos para el modal de confirmación y mensajes */
         .modal-overlay {
@@ -55,172 +67,152 @@
             }
         }
     </style>
-
-  <!-- PWA meta & icons -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Anita Gourmet">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="icon" href="icon-192.png" type="image/png">
-
 </head>
 <body class="bg-gray-100 p-4 sm:p-8">
-<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6" id="app">
-<!-- Panel de Resumen -->
-<div class="lg:col-span-1 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl text-white shadow-lg p-6 sm:p-8 flex flex-col justify-between">
-<div>
-<h1 class="text-3xl sm:text-4xl font-extrabold mb-2">Anita Maria</h1>
-<p class="text-indigo-100 text-lg mb-6">Gestión de Ventas</p>
-<div class="space-y-4">
-<div class="flex items-center space-x-4">
-<div class="bg-white/20 rounded-full p-3 backdrop-blur-sm">
-<svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.592 1L21 12h-4m-9 0H3l.408-1.006A6 6 0 0112 4s.484 2 2 2h3s-1.16-1.579-2.592-1c-.512-.598-1.482-1-2.592-1z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-</div>
-<div>
-<p class="text-indigo-100 text-sm">Ventas Totales</p>
-<p class="text-2xl font-bold" id="total-sales-amount">$0.00</p>
-</div>
-</div>
-<div class="flex items-center space-x-4">
-<div class="bg-white/20 rounded-full p-3 backdrop-blur-sm">
-<svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-</div>
-<div>
-<p class="text-indigo-100 text-sm">Ventas este mes</p>
-<p class="text-2xl font-bold" id="monthly-sales-count">0</p>
-</div>
-</div>
-</div>
-<!-- Desglose por tipo de venta -->
-<div class="mt-8 pt-4 border-t border-indigo-400">
-<p class="text-indigo-100 text-sm mb-2">Desglose por tipo de venta (este mes):</p>
-<div class="flex justify-between items-center text-sm font-medium mb-1">
-<span>Contado:</span>
-<span id="monthly-contado-amount">$0.00</span>
-</div>
-<div class="flex justify-between items-center text-sm font-medium mb-1">
-<span>Crédito:</span>
-<span id="monthly-credito-amount">$0.00</span>
-</div>
-<div class="flex justify-between items-center text-sm font-medium">
-<span>Transferencia:</span>
-<span id="monthly-transferencia-amount">$0.00</span>
-</div>
-</div>
-</div>
-</div>
-<!-- Formulario de Nueva Venta -->
-<div class="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-<h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Nueva Venta</h2>
-<form class="space-y-6" id="new-sale-form">
-<div>
-<label class="block text-sm font-medium text-gray-700" for="buyer-name">Nombre del Comprador</label>
-<input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" id="buyer-name" type="text"/>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700" for="sale-date">Fecha de Venta</label>
-<input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" id="sale-date" required="" type="date"/>
-</div>
-<div class="space-y-4" id="sale-items-container">
-<h3 class="text-xl font-semibold text-gray-800">Items de la Venta</h3>
-<!-- Los items se añadirán aquí dinámicamente -->
-</div>
-<button class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-indigo-700 bg-indigo-100 hover:bg-indigo-200 transition duration-150" id="add-item-btn" type="button">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6" id="app">
+
+        <div class="lg:col-span-1 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl text-white shadow-lg p-6 sm:p-8 flex flex-col justify-between">
+            <div>
+                <h1 class="text-3xl sm:text-4xl font-extrabold mb-2">Anita Maria</h1>
+                <p class="text-indigo-100 text-lg mb-6">Gestión de Ventas</p>
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-white/20 rounded-full p-3 backdrop-blur-sm">
+                            <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.592 1L21 12h-4m-9 0H3l.408-1.006A6 6 0 0112 4s.484 2 2 2h3s-1.16-1.579-2.592-1c-.512-.598-1.482-1-2.592-1z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-indigo-100 text-sm">Ventas Totales</p>
+                            <p class="text-2xl font-bold" id="total-sales-amount">$0.00</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-white/20 rounded-full p-3 backdrop-blur-sm">
+                            <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-indigo-100 text-sm">Ventas este mes</p>
+                            <p class="text-2xl font-bold" id="monthly-sales-count">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 pt-4 border-t border-indigo-400">
+                    <p class="text-indigo-100 text-sm mb-2">Desglose por tipo de venta (este mes):</p>
+                    <div class="flex justify-between items-center text-sm font-medium mb-1">
+                        <span>Contado:</span>
+                        <span id="monthly-contado-amount">$0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm font-medium mb-1">
+                        <span>Crédito:</span>
+                        <span id="monthly-credito-amount">$0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm font-medium">
+                        <span>Transferencia:</span>
+                        <span id="monthly-transferencia-amount">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Nueva Venta</h2>
+            <form class="space-y-6" id="new-sale-form">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700" for="buyer-name">Nombre del Comprador</label>
+                    <input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" id="buyer-name" type="text"/>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700" for="sale-date">Fecha de Venta</label>
+                    <input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" id="sale-date" required="" type="date"/>
+                </div>
+                <div class="space-y-4" id="sale-items-container">
+                    <h3 class="text-xl font-semibold text-gray-800">Items de la Venta</h3>
+                    </div>
+                <button class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-indigo-700 bg-indigo-100 hover:bg-indigo-200 transition duration-150" id="add-item-btn" type="button">
                     Añadir Item
                 </button>
-
-<!-- Nuevo campo para el tipo de venta -->
-<div class="pt-4">
-<label class="block text-sm font-medium text-gray-700" for="payment-type">Tipo de Venta</label>
-<select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" id="payment-type">
-<option value="contado">Contado</option>
-<option value="credito">Crédito</option>
-<option value="transferencia">Transferencia Inmediata</option>
-</select>
-</div><div class="pt-4">
-<div class="flex justify-between items-baseline mb-2">
-<label class="block text-sm font-medium text-gray-700">Total de Venta</label>
-<span class="text-xl font-bold text-indigo-600" id="total-venta-display">
-                            $0.00
-                        </span>
-</div>
-<label class="block text-sm font-medium text-gray-700" for="amount-paid">Monto Pagado</label>
-<input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" id="amount-paid" min="0" required="" step="0.01" type="number"/>
-</div>
-<div class="text-red-500 text-sm hidden" id="validation-message">
+                <div class="pt-4">
+                    <label class="block text-sm font-medium text-gray-700" for="payment-type">Tipo de Venta</label>
+                    <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" id="payment-type">
+                        <option value="contado">Contado</option>
+                        <option value="credito">Crédito</option>
+                        <option value="transferencia">Transferencia Inmediata</option>
+                    </select>
+                </div>
+                <div class="pt-4">
+                    <div class="flex justify-between items-baseline mb-2">
+                        <label class="block text-sm font-medium text-gray-700">Total de Venta</label>
+                        <span class="text-xl font-bold text-indigo-600" id="total-venta-display">$0.00</span>
+                    </div>
+                    <label class="block text-sm font-medium text-gray-700" for="amount-paid">Monto Pagado</label>
+                    <input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" id="amount-paid" min="0" required="" step="0.01" type="number"/>
+                </div>
+                <div class="text-red-500 text-sm hidden" id="validation-message">
                     Por favor, asegúrese de que el monto pagado no sea mayor que el total de la venta.
                 </div>
-<button class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150" id="save-sale-btn" type="submit">
+                <button class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150" id="save-sale-btn" type="submit">
                     Registrar Venta
                 </button>
-</form>
-</div>
-<!-- Tabla de Historial de Ventas -->
-<div class="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6 sm:p-8 overflow-x-auto">
-<div class="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6">
-<h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-0">Historial de Ventas</h2>
-<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
-<!-- Selector de Mes y Año para imprimir -->
-<input class="w-full sm:w-auto rounded-md border-gray-300 shadow-sm text-gray-700 focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" id="print-month-year" type="month"/><input class="w-full sm:w-auto rounded-md border-gray-300 shadow-sm text-gray-700 focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" id="print-daily-date" type="date"/>
-<!-- Botón para Imprimir Reporte -->
-<button class="w-full sm:w-auto flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150" id="print-report-btn">
+            </form>
+        </div>
+
+        <div class="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6 sm:p-8 overflow-x-auto">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6">
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-0">Historial de Ventas</h2>
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
+                    <input class="w-full sm:w-auto rounded-md border-gray-300 shadow-sm text-gray-700 focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" id="print-month-year" type="month"/>
+                    <input class="w-full sm:w-auto rounded-md border-gray-300 shadow-sm text-gray-700 focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" id="print-daily-date" type="date"/>
+                    <button class="w-full sm:w-auto flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150" id="print-report-btn">
                         Imprimir Reporte
-                    </button><button class="w-full sm:w-auto flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150" id="print-daily-report-btn">Imprimir Diario</button>
-<!-- Botón para Limpiar Historial -->
-<button class="w-full sm:w-auto flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150" id="clear-sales-btn">
+                    </button>
+                    <button class="w-full sm:w-auto flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150" id="print-daily-report-btn">Imprimir Diario</button>
+                    <button class="w-full sm:w-auto flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150" id="clear-sales-btn">
                         Limpiar Historial
                     </button>
-</div>
-</div>
-<div id="sales-history-container"></div>
-</div>
-<!-- Tabla de Productos -->
-<div class="lg:col-span-1 bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-<h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Productos</h2>
-<div class="overflow-x-auto">
-<table class="min-w-full divide-y divide-gray-200">
-<thead class="bg-gray-50">
-<tr>
-<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">Nombre</th>
-<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">Precio</th>
-<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">Stock</th>
-</tr>
-</thead>
-<tbody class="bg-white divide-y divide-gray-200" id="product-list">
-<!-- Los productos se añadirán aquí dinámicamente -->
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<!-- Modal de confirmación para limpiar historial -->
-<div class="modal-overlay hidden" id="clear-modal">
-<div class="modal-content">
-<h3 class="text-xl font-bold mb-4">Confirmar Limpieza de Historial</h3>
-<p class="text-gray-700 mb-6">¿Estás seguro de que quieres borrar permanentemente todo el historial de ventas? Esta acción no se puede deshacer.</p>
-<div class="flex justify-center space-x-4">
-<button class="py-2 px-4 rounded-full text-gray-700 border border-gray-300 hover:bg-gray-100 transition duration-150" id="clear-modal-cancel">Cancelar</button>
-<button class="py-2 px-4 rounded-full text-white bg-red-600 hover:bg-red-700 transition duration-150" id="clear-modal-confirm">Confirmar</button>
-</div>
-</div>
-</div>
-<!-- Modal para mensajes de error o información -->
-<div class="modal-overlay hidden" id="message-modal">
-<div class="modal-content">
-<h3 class="text-xl font-bold mb-4" id="message-modal-title">Mensaje</h3>
-<p class="text-gray-700 mb-6" id="message-modal-text"></p>
-<button class="py-2 px-4 rounded-full text-white bg-indigo-600 hover:bg-indigo-700 transition duration-150" id="message-modal-close">Cerrar</button>
-</div>
-</div>
-<!-- Contenedor para la impresión (oculto por defecto) -->
-<div class="print-container hidden"></div>
-<script>
+                </div>
+            </div>
+            <div id="sales-history-container"></div>
+        </div>
+
+        <div class="lg:col-span-1 bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Productos</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">Nombre</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">Precio</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">Stock</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="product-list">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="clear-modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4">Confirmar Limpieza de Historial</h3>
+            <p class="text-gray-700 mb-6">¿Estás seguro de que quieres borrar permanentemente todo el historial de ventas? Esta acción no se puede deshacer.</p>
+            <div class="flex justify-center space-x-4">
+                <button class="py-2 px-4 rounded-full text-gray-700 border border-gray-300 hover:bg-gray-100 transition duration-150" id="clear-modal-cancel">Cancelar</button>
+                <button class="py-2 px-4 rounded-full text-white bg-red-600 hover:bg-red-700 transition duration-150" id="clear-modal-confirm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="message-modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4" id="message-modal-title">Mensaje</h3>
+            <p class="text-gray-700 mb-6" id="message-modal-text"></p>
+            <button class="py-2 px-4 rounded-full text-white bg-indigo-600 hover:bg-indigo-700 transition duration-150" id="message-modal-close">Cerrar</button>
+        </div>
+    </div>
+
+    <div class="print-container hidden"></div>
+    
+    <script>
         // Funciones auxiliares
         function generateUUID() {
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -261,7 +253,6 @@
                 originalStock: (p.originalStock !== undefined ? p.originalStock : p.stock)
             }));
         }
-
 
         // Guarda el estado en localStorage
         function saveState() {
@@ -397,7 +388,6 @@
             const totalAmount = state.newSale.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
             totalVentaDisplayEl.textContent = formatCurrency(totalAmount);
         }
-
 
         // Carga una venta existente en el formulario para poder editarla sin cambiar la interfaz
         function loadSaleIntoForm(saleId) {
@@ -636,221 +626,86 @@
                             const p = state.products.find(pp => pp.name === item.name);
                             if (p) p.stock -= item.quantity;
                         });
-                        state.sales[idx] = {
-                            ...prev,
-                            buyerName: state.newSale.buyerName,
-                            date: new Date(state.newSale.date),
-                            items: state.newSale.items.map(it => ({ name: it.name, price: it.price, quantity: it.quantity })),
-                            amountPaid: state.newSale.amountPaid,
-                            paymentType: state.newSale.paymentType,
-                            totalAmount,
-                            amountOwed
-                        };
+                        state.sales[idx] = newSaleItem;
                     }
                     state.editingSaleId = null;
                 } else {
-                    state.products = updatedProducts;
                     state.sales.push(newSaleItem);
+                    state.newSale.items.forEach(item => {
+                        const product = state.products.find(p => p.name === item.name);
+                        if (product) {
+                            product.stock -= item.quantity;
+                        }
+                    });
                 }
+                
                 resetNewSaleForm();
                 renderApp();
-    
             });
 
-            // Event listener para el botón "Añadir Item"
+            // Event listeners para añadir, quitar y modificar items
             document.getElementById('add-item-btn').addEventListener('click', () => {
-                state.newSale.items.push({
-                    name: '',
-                    price: 0,
-                    quantity: 1
-                });
+                state.newSale.items.push({ name: '', quantity: 1, price: 0 });
                 renderNewSaleForm();
             });
 
-            // Event listeners para los items de la venta
             document.getElementById('sale-items-container').addEventListener('change', (e) => {
-                const target = e.target;
-                if (target.classList.contains('item-name')) {
-                    const index = target.dataset.index;
-                    const productName = target.value;
-                    const product = state.products.find(p => p.name === productName);
-                    if (product) {
-                        state.newSale.items[index].name = product.name;
-                        state.newSale.items[index].price = product.price;
-                    } else {
-                        state.newSale.items[index].name = '';
-                        state.newSale.items[index].price = 0;
-                    }
+                const index = e.target.dataset.index;
+                if (!index) return;
+
+                if (e.target.classList.contains('item-name')) {
+                    const selectedProduct = state.products.find(p => p.name === e.target.value);
+                    state.newSale.items[index].name = e.target.value;
+                    state.newSale.items[index].price = selectedProduct ? selectedProduct.price : 0;
+                } else if (e.target.classList.contains('item-quantity')) {
+                    state.newSale.items[index].quantity = parseInt(e.target.value, 10);
                 }
-                if (target.classList.contains('item-quantity')) {
-                    const index = target.dataset.index;
-                    state.newSale.items[index].quantity = parseInt(target.value) || 0; // Aseguramos que sea un número
-                }
-                // Vuelve a renderizar el formulario para actualizar el total
                 renderNewSaleForm();
             });
-
+            
             document.getElementById('sale-items-container').addEventListener('click', (e) => {
-                if (e.target.closest('.remove-item-btn')) {
-                    const index = e.target.closest('.remove-item-btn').dataset.index;
+                const button = e.target.closest('.remove-item-btn');
+                if (button) {
+                    const index = button.dataset.index;
                     state.newSale.items.splice(index, 1);
-                    // Vuelve a renderizar el formulario para actualizar el total
                     renderNewSaleForm();
                 }
             });
-            
-            // Event listener para el cambio de tipo de pago
-            document.getElementById('payment-type').addEventListener('change', (e) => {
-                state.newSale.paymentType = e.target.value;
-            });
 
-            // Event listener para el botón "Imprimir Reporte"
-            document.getElementById('print-report-btn').addEventListener('click', () => {
-                const monthYearInput = document.getElementById('print-month-year');
-                const [year, month] = monthYearInput.value.split('-').map(Number);
-                if (year && month) {
-                    printReport(month - 1, year); // Los meses en JS son de 0-11
-                } else {
-                    showMessageModal('Error de Impresión', 'Por favor, seleccione un mes y año para imprimir.');
-                }
-            });
-
-            // Event listener para el botón "Limpiar Historial"
-            document.getElementById('clear-sales-btn').addEventListener('click', () => {
-                showClearModal();
-            });
-
-            // Event listeners para el modal de confirmación
+            // Event listeners para los modales
+            document.getElementById('clear-sales-btn').addEventListener('click', showClearModal);
+            clearModalCancelEl.addEventListener('click', hideClearModal);
             clearModalConfirmEl.addEventListener('click', () => {
                 state.sales = [];
-                // Se restaura el stock original al limpiar el historial
-                state.products = state.products.map(p => {
-                    return { ...p, stock: p.originalStock || p.stock };
-                });
+                // Reset stock to original values
+                state.products = state.products.map(p => ({
+                    ...p,
+                    stock: p.originalStock
+                }));
+                hideClearModal();
                 renderApp();
-                hideClearModal();
             });
-            clearModalCancelEl.addEventListener('click', () => {
-                hideClearModal();
+            document.getElementById('message-modal-close').addEventListener('click', hideMessageModal);
+
+            // Event listeners para imprimir
+            document.getElementById('print-report-btn').addEventListener('click', () => {
+                const monthYear = document.getElementById('print-month-year').value;
+                if (!monthYear) {
+                    showMessageModal('Error de Impresión', 'Por favor, seleccione un mes y año.');
+                    return;
+                }
+                const [year, month] = monthYear.split('-').map(Number);
+                printReport(month - 1, year);
             });
-            
-            // Event listener para el botón de cerrar el modal de mensajes
-            document.getElementById('message-modal-close').addEventListener('click', () => {
-                hideMessageModal();
+            document.getElementById('print-daily-report-btn').addEventListener('click', () => {
+                const date = document.getElementById('print-daily-date').value;
+                if (!date) {
+                    showMessageModal('Error de Impresión', 'Por favor, seleccione una fecha.');
+                    return;
+                }
+                // Implementar lógica de impresión diaria
             });
         });
     </script>
-<footer class="mt-8 text-center text-gray-500 text-sm">
-<p>Creado por MONKEY para Anita Maria Figueroa.</p>
-</footer>
-<script>
-            // Lógica automática para tipo de venta
-            document.getElementById('payment-type').addEventListener('change', (e) => {
-                const amountPaidEl = document.getElementById('amount-paid');
-                if (e.target.value === 'credito') {
-                    amountPaidEl.value = 0;
-                    amountPaidEl.setAttribute('readonly', true);
-                } else {
-                    amountPaidEl.removeAttribute('readonly');
-                }
-                state.newSale.paymentType = e.target.value;
-            });
-
-            // Imprimir reporte diario
-            function printDailyReport(dayStr) {
-                const date = new Date(dayStr);
-                const sales = state.sales.filter(sale => {
-                    const saleDate = new Date(sale.date);
-                    return saleDate.toDateString() === date.toDateString();
-                });
-
-                const printContainer = document.querySelector('.print-container');
-                printContainer.innerHTML = '';
-
-                if (sales.length === 0) {
-                    showMessageModal('Error de Impresión', 'No hay ventas para la fecha seleccionada.');
-                    return;
-                }
-
-                const header = document.createElement('div');
-                header.className = 'p-8 text-center';
-                header.innerHTML = `
-                    <h1 class="text-4xl font-bold mb-2">Reporte Diario de Ventas</h1>
-                    <h2 class="text-xl text-gray-600 mb-6">Día: ${date.toLocaleDateString()}</h2>
-                `;
-                printContainer.appendChild(header);
-
-                const table = document.createElement('table');
-                table.className = 'table-print-view text-left text-sm';
-                table.innerHTML = \`
-                    <thead class="bg-gray-200">
-                        <tr>
-                            <th class="px-6 py-3">Fecha</th>
-                            <th class="px-6 py-3">Comprador</th>
-                            <th class="px-6 py-3">Productos</th>
-                            <th class="px-6 py-3">Total</th>
-                            <th class="px-6 py-3">Deuda</th>
-                            <th class="px-6 py-3">Tipo de Venta</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                \`;
-
-                const tbody = table.querySelector('tbody');
-                let total = 0;
-                let deuda = 0;
-
-                sales.forEach(sale => {
-                    total += sale.totalAmount;
-                    deuda += sale.amountOwed;
-                    const productsList = sale.items.map(item => \`\${item.name} (\${item.quantity})\`).join(', ');
-                    const paymentTypeMap = {
-                        'contado': 'Contado',
-                        'credito': 'Crédito',
-                        'transferencia': 'Transferencia'
-                    };
-                    const row = document.createElement('tr');
-                    row.innerHTML = \`
-                        <td class="px-6 py-4">\${new Date(sale.date).toLocaleDateString()}</td>
-                        <td class="px-6 py-4">\${sale.buyerName}</td>
-                        <td class="px-6 py-4">\${productsList}</td>
-                        <td class="px-6 py-4">\${formatCurrency(sale.totalAmount)}</td>
-                        <td class="px-6 py-4">\${formatCurrency(sale.amountOwed)}</td>
-                        <td class="px-6 py-4">\${paymentTypeMap[sale.paymentType]}</td>
-                    \`;
-                    tbody.appendChild(row);
-                });
-
-                const summaryRow = document.createElement('tr');
-                summaryRow.className = 'font-bold';
-                summaryRow.innerHTML = \`
-                    <td colspan="3" class="px-6 py-4 text-right">Totales del día:</td>
-                    <td class="px-6 py-4">\${formatCurrency(total)}</td>
-                    <td class="px-6 py-4">\${formatCurrency(deuda)}</td>
-                    <td class="px-6 py-4"></td>
-                \`;
-                tbody.appendChild(summaryRow);
-
-                printContainer.appendChild(table);
-                
-            printContainer.classList.remove('hidden');
-            const finalize = () => { printContainer.classList.add('hidden'); };
-            if (window.matchMedia) {
-                const mq = window.matchMedia('print');
-                const listener = (e) => { if (!e.matches) { finalize(); mq.removeListener(listener);} };
-                mq.addListener(listener);
-            }
-            setTimeout(() => window.print(), 50);
-        
-            }
-
-            document.getElementById('print-daily-report-btn').addEventListener('click', () => {
-                const input = document.getElementById('print-daily-date');
-                if (input.value) {
-                    printDailyReport(input.value);
-                } else {
-                    showMessageModal('Error de Impresión', 'Por favor, seleccione una fecha para imprimir.');
-                }
-            });
-</script></body>
+</body>
 </html>
