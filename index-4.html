@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Anita Maria - Gestión de Ventas</title>
+<!-- Incluye Tailwind CSS para un diseño moderno y responsivo -->
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Estilos para el modal de confirmación y mensajes */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            text-align: center;
+        }
+        /* Estilos para la impresión */
+        @media print {
+            body > *:not(.print-container) {
+                display: none !important;
+            }
+            .print-container {
+                display: block !important;
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                color: #000;
+            }
+            .print-container h1, .print-container h2 {
+                color: #000;
+            }
+            .print-container .table-print-view th, .print-container .table-print-view td {
+                border: 1px solid #ddd;
+                padding: 8px;
+            }
+            .print-container .table-print-view {
+                width: 100%;
+                border-collapse: collapse;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 sm:p-8">
+<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6" id="app">
+<!-- Panel de Resumen -->
+<div class="lg:col-span-1 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl text-white shadow-lg p-6 sm:p-8 flex flex-col justify-between">
+<div>
+<h1 class="text-3xl sm:text-4xl font-extrabold mb-2">Anita Maria</h1>
+<p class="text-indigo-100 text-lg mb-6">Gestión de Ventas</p>
+<div class="space-y-4">
+<div class="flex items-center space-x-4">
+<div class="bg-white/20 rounded-full p-3 backdrop-blur-sm">
+<svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.592 1L21 12h-4m-9 0H3l.408-1.006A6 6 0 0112 4s.484 2 2 2h3s-1.16-1.579-2.592-1c-.512-.598-1.482-1-2.592-1z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<p class="text-indigo-100 text-sm">Ventas Totales</p>
+<p class="text-2xl font-bold" id="total-sales-amount">$0.00</p>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<div class="bg-white/20 rounded-full p-3 backdrop-blur-sm">
+<svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<p class="text-indigo-100 text-sm">Ventas este mes</p>
+<p class="text-2xl font-bold" id="monthly-sales-count">0</p>
+</div>
+</div>
+</div>
+<!-- Desglose por tipo de venta -->
+<div class="mt-8 pt-4 border-t border-indigo-400">
+<p class="text-indigo-100 text-sm mb-2">Desglose por tipo de venta (este mes):</p>
+<div class="flex justify-between items-center text-sm font-medium mb-1">
+<span>Contado:</span>
+<span id="monthly-contado-amount">$0.00</span>
+</div>
+<div class="flex justify-between items-center text-sm font-medium mb-1">
+<span>Crédito:</span>
+<span id="monthly-credito-amount">$0.00</span>
+</div>
+<div class="flex justify-between items-center text-sm font-medium">
+<span>Transferencia:</span>
+<span id="monthly-transferencia-amount">$0.00</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Formulario de Nueva Venta -->
+<div class="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+<h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Nueva Venta</h2>
+<form class="space-y-6" id="new-sale-form">
+<div>
+<label class="block text-sm font-medium text-gray-700" for="buyer-name">Nombre del Comprador</label>
+<input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" id="buyer-name" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700" for="sale-date">Fecha de Venta</label>
+<input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" id="sale-date" required="" type="date"/>
+</div>
+<div class="space-y-4" id="sale-items-container">
+<h3 class="text-xl font-semibold text-gray-800">Items de la Venta</h3>
+<!-- Los items se añadirán aquí dinámicamente -->
+</div>
+<button class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-indigo-700 bg-indigo-100 hover:bg-indigo-200 transition duration-150" id="add-item-btn" type="button">
+                    Añadir Item
+                </button>
+
+<!-- Nuevo campo para el tipo de venta -->
+<div class="pt-4">
+<label class="block text-sm font-medium text-gray-700" for="payment-type">Tipo de Venta</label>
+<select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" id="payment-type">
+<option value="contado">Contado</option>
+<option value="credito">Crédito</option>
+<option value="transferencia">Transferencia Inmediata</option>
+</select>
+</div><div class="pt-4">
+<div class="flex justify-between items-baseline mb-2">
+<label class="block text-sm font-medium text-gray-700">Total de Venta</label>
+<span class="text-xl font-bold text-indigo-600" id="total-venta-display">
+                            $0.00
+                        </span>
+</div>
+<label class="block text-sm font-medium text-gray-700" for="amount-paid">Monto Pagado</label>
+<input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" id="amount-paid" min="0" required="" step="0.01" type="number"/>
+</div>
+<div class="text-red-500 text-sm hidden" id="validation-message">
+                    Por favor, asegúrese de que el monto pagado no sea mayor que el total de la venta.
+                </div>
+<button class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150" id="save-sale-btn" type="submit">
+                    Registrar Venta
+                </button>
+</form>
+</div>
+<!-- Tabla de Historial de Ventas -->
+<div class="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6 sm:p-8 overflow-x-auto">
+<div class="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6">
+<h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-0">Historial de Ventas</h2>
+<div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
+<!-- Selector de Mes y Año para imprimir -->
+<input class="w-full sm:w-auto rounded-md border-gray-300 shadow-sm text-gray-700 focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" id="print-month-year" type="month"/><input class="w-full sm:w-auto rounded-md border-gray-300 shadow-sm text-gray-700 focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" id="print-daily-date" type="date"/>
+<!-- Botón para Imprimir Reporte -->
+<button class="w-full sm:w-auto flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150" id="print-report-btn">
+                        Imprimir Reporte
+                    </button><button class="w-full sm:w-auto flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150" id="print-daily-report-btn">Imprimir Diario</button>
+<!-- Botón para Limpiar Historial -->
+<button class="w-full sm:w-auto flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150" id="clear-sales-btn">
+                        Limpiar Historial
+                    </button>
+</div>
+</div>
+<div id="sales-history-container"></div>
+</div>
+<!-- Tabla de Productos -->
+<div class="lg:col-span-1 bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+<h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Productos</h2>
+<div class="overflow-x-auto">
+<table class="min-w-full divide-y divide-gray-200">
+<thead class="bg-gray-50">
+<tr>
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">Nombre</th>
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">Precio</th>
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">Stock</th>
+</tr>
+</thead>
+<tbody class="bg-white divide-y divide-gray-200" id="product-list">
+<!-- Los productos se añadirán aquí dinámicamente -->
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Modal de confirmación para limpiar historial -->
+<div class="modal-overlay hidden" id="clear-modal">
+<div class="modal-content">
+<h3 class="text-xl font-bold mb-4">Confirmar Limpieza de Historial</h3>
+<p class="text-gray-700 mb-6">¿Estás seguro de que quieres borrar permanentemente todo el historial de ventas? Esta acción no se puede deshacer.</p>
+<div class="flex justify-center space-x-4">
+<button class="py-2 px-4 rounded-full text-gray-700 border border-gray-300 hover:bg-gray-100 transition duration-150" id="clear-modal-cancel">Cancelar</button>
+<button class="py-2 px-4 rounded-full text-white bg-red-600 hover:bg-red-700 transition duration-150" id="clear-modal-confirm">Confirmar</button>
+</div>
+</div>
+</div>
+<!-- Modal para mensajes de error o información -->
+<div class="modal-overlay hidden" id="message-modal">
+<div class="modal-content">
+<h3 class="text-xl font-bold mb-4" id="message-modal-title">Mensaje</h3>
+<p class="text-gray-700 mb-6" id="message-modal-text"></p>
+<button class="py-2 px-4 rounded-full text-white bg-indigo-600 hover:bg-indigo-700 transition duration-150" id="message-modal-close">Cerrar</button>
+</div>
+</div>
+<!-- Contenedor para la impresión (oculto por defecto) -->
+<div class="print-container hidden"></div>
+<script>
+        // Funciones auxiliares
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+        
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(amount);
+        }
+
+        // Estado global de la aplicación
+        let state = {
+            products: JSON.parse(localStorage.getItem('products')) || [
+                { name: 'Queso', price: 10500, stock: 50 },
+                { name: 'Longanizas', price: 8700, stock: 30 },
+                { name: 'Arrollado', price: 4700, stock: 10 },
+                { name: 'Queso Especies', price: 7000, stock: 5 },
+                { name: 'Prietas', price: 8500, stock: 4 }
+            ],
+            sales: JSON.parse(localStorage.getItem('sales')) || [],
+            newSale: {
+                buyerName: '',
+                date: new Date().toISOString().split('T')[0],
+                items: [],
+                amountPaid: 0,
+                paymentType: 'contado'
+            },
+        };
+        // Atributo para saber si estamos editando una venta existente
+        state.editingSaleId = null;
+
+        // Normaliza productos para asegurar originalStock
+        function normalizeProducts() {
+            state.products = state.products.map(p => ({
+                ...p,
+                originalStock: (p.originalStock !== undefined ? p.originalStock : p.stock)
+            }));
+        }
+
+
+        // Guarda el estado en localStorage
+        function saveState() {
+            localStorage.setItem('products', JSON.stringify(state.products));
+            localStorage.setItem('sales', JSON.stringify(state.sales));
+        }
+        
+        // Muestra un modal de mensaje con un título y texto
+        function showMessageModal(title, text) {
+            const modalEl = document.getElementById('message-modal');
+            document.getElementById('message-modal-title').textContent = title;
+            document.getElementById('message-modal-text').textContent = text;
+            modalEl.classList.remove('hidden');
+        }
+
+        // Oculta el modal de mensaje
+        function hideMessageModal() {
+            const modalEl = document.getElementById('message-modal');
+            modalEl.classList.add('hidden');
+        }
+
+        // Resetea el formulario de nueva venta, tanto el estado como la UI
+        function resetNewSaleForm() {
+            state.newSale = {
+                buyerName: '',
+                date: new Date().toISOString().split('T')[0],
+                items: [],
+                amountPaid: 0,
+                paymentType: 'contado'
+            };
+            document.getElementById('buyer-name').value = '';
+            document.getElementById('sale-date').value = state.newSale.date;
+            document.getElementById('amount-paid').value = 0;
+            document.getElementById('payment-type').value = 'contado';
+            
+            // Llama a renderNewSaleForm para actualizar los ítems y el total
+            renderNewSaleForm();
+
+            // Enfoca el campo del comprador, listo para la siguiente venta
+            document.getElementById('buyer-name').focus();
+        }
+
+        // Renderiza la aplicación completa
+        function renderApp() {
+            renderSummary();
+            renderProductList();
+            renderNewSaleForm();
+            renderSalesHistory();
+            saveState();
+        }
+
+        // Renderiza el panel de resumen
+        function renderSummary() {
+            const totalSalesAmountEl = document.getElementById('total-sales-amount');
+            const monthlySalesCountEl = document.getElementById('monthly-sales-count');
+            
+            const monthlyContadoAmountEl = document.getElementById('monthly-contado-amount');
+            const monthlyCreditoAmountEl = document.getElementById('monthly-credito-amount');
+            const monthlyTransferenciaAmountEl = document.getElementById('monthly-transferencia-amount');
+            
+            const totalAmount = state.sales.reduce((acc, sale) => acc + sale.totalAmount, 0);
+            totalSalesAmountEl.textContent = formatCurrency(totalAmount);
+
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            const monthlySales = state.sales.filter(sale => {
+                const saleDate = new Date(sale.date);
+                return saleDate.getMonth() === currentMonth && saleDate.getFullYear() === currentYear;
+            });
+            monthlySalesCountEl.textContent = monthlySales.length;
+
+            const monthlyTotals = monthlySales.reduce((acc, sale) => {
+                acc[sale.paymentType] = (acc[sale.paymentType] || 0) + sale.totalAmount;
+                return acc;
+            }, {});
+
+            monthlyContadoAmountEl.textContent = formatCurrency(monthlyTotals['contado'] || 0);
+            monthlyCreditoAmountEl.textContent = formatCurrency(monthlyTotals['credito'] || 0);
+            monthlyTransferenciaAmountEl.textContent = formatCurrency(monthlyTotals['transferencia'] || 0);
+        }
+
+        // Renderiza la lista de productos
+        function renderProductList() {
+            const productListEl = document.getElementById('product-list');
+            productListEl.innerHTML = '';
+            state.products.forEach(product => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${product.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatCurrency(product.price)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${product.stock}</td>
+                `;
+                productListEl.appendChild(row);
+            });
+        }
+
+        // Renderiza el formulario de nueva venta
+        function renderNewSaleForm() {
+            const saleItemsContainer = document.getElementById('sale-items-container');
+            const totalVentaDisplayEl = document.getElementById('total-venta-display');
+            
+            // Limpiamos los ítems anteriores
+            saleItemsContainer.innerHTML = `
+                <h3 class="text-xl font-semibold text-gray-800">Items de la Venta</h3>
+            `;
+            
+            // Itera sobre los items de la venta y crea los select e inputs
+            state.newSale.items.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'flex items-center space-x-4';
+                itemDiv.innerHTML = `
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700">Item ${index + 1}</label>
+                        <select data-index="${index}" class="item-name mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition duration-150">
+                            <option value="">Seleccione un producto</option>
+                            ${state.products.map(p => `<option value="${p.name}" ${p.name === item.name ? 'selected' : ''}>${p.name}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Cantidad</label>
+                        <input type="number" data-index="${index}" min="1" class="item-quantity mt-1 block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition duration-150" value="${item.quantity}" required>
+                    </div>
+                    <button type="button" data-index="${index}" class="remove-item-btn mt-4 text-red-500 hover:text-red-700 transition duration-150">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                `;
+                saleItemsContainer.appendChild(itemDiv);
+            });
+            
+            // Calculamos el total de la venta en tiempo real y lo mostramos
+            const totalAmount = state.newSale.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+            // Recalcular total sumando todos los items
+            const recalculatedTotal = state.newSale.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+            totalVentaDisplayEl.textContent = formatCurrency(recalculatedTotal);
+            state.newSale.total = recalculatedTotal;
+        }
+
+
+        // Carga una venta existente en el formulario para poder editarla sin cambiar la interfaz
+        function loadSaleIntoForm(saleId) {
+            const sale = state.sales.find(s => s.id === saleId);
+            if (!sale) return;
+
+            state.editingSaleId = saleId;
+
+            state.newSale = {
+                buyerName: sale.buyerName,
+                date: new Date(sale.date).toISOString().split('T')[0],
+                items: sale.items.map(it => ({ name: it.name, price: it.price, quantity: it.quantity })),
+                amountPaid: sale.amountPaid,
+                paymentType: sale.paymentType
+            };
+
+            document.getElementById('buyer-name').value = state.newSale.buyerName;
+            document.getElementById('sale-date').value = state.newSale.date;
+            document.getElementById('amount-paid').value = state.newSale.amountPaid;
+            document.getElementById('payment-type').value = state.newSale.paymentType;
+
+            renderNewSaleForm();
+            document.getElementById('buyer-name').focus();
+        }
+
+        // Renderiza el historial de ventas
+        function renderSalesHistory() {
+            const salesHistoryContainerEl = document.getElementById('sales-history-container');
+            salesHistoryContainerEl.innerHTML = '';
+            
+            if (state.sales.length === 0) {
+                salesHistoryContainerEl.innerHTML = '<p class="text-center text-gray-500">No hay ventas registradas aún.</p>';
+                return;
+            }
+
+            const table = document.createElement('table');
+            table.className = 'min-w-full divide-y divide-gray-200';
+            table.innerHTML = `
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comprador</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Productos</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deuda</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo de Venta</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                </tbody>
+            `;
+            const tbody = table.querySelector('tbody');
+
+            state.sales.forEach(sale => {
+                const row = document.createElement('tr');
+                const productsList = sale.items.map(item => `${item.name} (${item.quantity})`).join(', ');
+                const debtClass = sale.amountOwed > 0 ? 'text-red-600 font-semibold' : 'text-green-600';
+                const paymentTypeMap = {
+                    'contado': 'Contado',
+                    'credito': 'Crédito',
+                    'transferencia': 'Transferencia'
+                };
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${new Date(sale.date).toLocaleDateString()}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${sale.buyerName}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${productsList}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatCurrency(sale.totalAmount)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm ${debtClass}">${formatCurrency(sale.amountOwed)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${paymentTypeMap[sale.paymentType] || sale.paymentType}</td>
+                `;
+                // Hacer clic en la fila para editar la venta sin agregar botones nuevos
+                row.addEventListener('click', () => {
+                    loadSaleIntoForm(sale.id);
+                });
+    
+                tbody.appendChild(row);
+            });
+            salesHistoryContainerEl.appendChild(table);
+        }
+
+        // Funciones para imprimir
+        function printReport(month, year) {
+            const printContainer = document.querySelector('.print-container');
+            printContainer.innerHTML = '';
+            
+            const monthlySales = state.sales.filter(sale => {
+                const saleDate = new Date(sale.date);
+                return saleDate.getMonth() === month && saleDate.getFullYear() === year;
+            });
+            
+            if (monthlySales.length === 0) {
+                showMessageModal('Error de Impresión', 'No hay ventas para el mes seleccionado.');
+                return;
+            }
+
+            const header = document.createElement('div');
+            header.className = 'p-8 text-center';
+            header.innerHTML = `
+                <h1 class="text-4xl font-bold mb-2">Reporte de Ventas</h1>
+                <h2 class="text-xl text-gray-600 mb-6">Mes: ${new Date(year, month).toLocaleString('es-CL', { month: 'long', year: 'numeric' })}</h2>
+            `;
+            printContainer.appendChild(header);
+
+            const table = document.createElement('table');
+            table.className = 'table-print-view text-left text-sm';
+            table.innerHTML = `
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="px-6 py-3">Fecha</th>
+                        <th class="px-6 py-3">Comprador</th>
+                        <th class="px-6 py-3">Productos</th>
+                        <th class="px-6 py-3">Total</th>
+                        <th class="px-6 py-3">Deuda</th>
+                        <th class="px-6 py-3">Tipo de Venta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            `;
+            const tbody = table.querySelector('tbody');
+            
+            let monthlyTotal = 0;
+            let monthlyDebt = 0;
+
+            monthlySales.forEach(sale => {
+                monthlyTotal += sale.totalAmount;
+                monthlyDebt += sale.amountOwed;
+                const productsList = sale.items.map(item => `${item.name} (${item.quantity})`).join(', ');
+                const paymentTypeMap = {
+                    'contado': 'Contado',
+                    'credito': 'Crédito',
+                    'transferencia': 'Transferencia'
+                };
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4">${new Date(sale.date).toLocaleDateString()}</td>
+                    <td class="px-6 py-4">${sale.buyerName}</td>
+                    <td class="px-6 py-4">${productsList}</td>
+                    <td class="px-6 py-4">${formatCurrency(sale.totalAmount)}</td>
+                    <td class="px-6 py-4">${formatCurrency(sale.amountOwed)}</td>
+                    <td class="px-6 py-4">${paymentTypeMap[sale.paymentType] || sale.paymentType}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            const summaryRow = document.createElement('tr');
+            summaryRow.className = 'font-bold';
+            summaryRow.innerHTML = `
+                <td colspan="3" class="px-6 py-4 text-right">Totales del mes:</td>
+                <td class="px-6 py-4">${formatCurrency(monthlyTotal)}</td>
+                <td class="px-6 py-4">${formatCurrency(monthlyDebt)}</td>
+                <td class="px-6 py-4"></td>
+            `;
+            tbody.appendChild(summaryRow);
+
+            printContainer.appendChild(table);
+
+            
+            printContainer.classList.remove('hidden');
+            const finalize = () => { printContainer.classList.add('hidden'); };
+            if (window.matchMedia) {
+                const mq = window.matchMedia('print');
+                const listener = (e) => { if (!e.matches) { finalize(); mq.removeListener(listener);} };
+                mq.addListener(listener);
+            }
+            setTimeout(() => window.print(), 50);
+        
+        }
+        
+        // Modal de confirmación para limpiar historial
+        const clearModalEl = document.getElementById('clear-modal');
+        const clearModalConfirmEl = document.getElementById('clear-modal-confirm');
+        const clearModalCancelEl = document.getElementById('clear-modal-cancel');
+        function showClearModal() { clearModalEl.classList.remove('hidden'); }
+        function hideClearModal() { clearModalEl.classList.add('hidden'); }
+        
+        // Inicializa la aplicación cuando el DOM esté cargado
+        document.addEventListener('DOMContentLoaded', () => {
+            normalizeProducts();
+            renderApp();
+
+            // Event listener para el formulario de nueva venta
+            document.getElementById('new-sale-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const buyerNameEl = document.getElementById('buyer-name');
+                const saleDateEl = document.getElementById('sale-date');
+                const amountPaidEl = document.getElementById('amount-paid');
+                const paymentTypeEl = document.getElementById('payment-type');
+                const validationMessageEl = document.getElementById('validation-message');
+
+                // Validación manual para el nombre del comprador y productos
+                if (!buyerNameEl.value.trim()) {
+                    showMessageModal('Error', 'Por favor, ingrese el nombre del comprador.');
+                    return;
+                }
+                if (state.newSale.items.length === 0) {
+                    showMessageModal('Error', 'Por favor, añada al menos un producto a la venta.');
+                    return;
+                }
+                
+                state.newSale.buyerName = buyerNameEl.value.trim();
+                state.newSale.date = saleDateEl.value;
+                state.newSale.amountPaid = parseFloat(amountPaidEl.value);
+                state.newSale.paymentType = paymentTypeEl.value;
+                
+                const totalAmount = state.newSale.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+                
+                if (state.newSale.amountPaid > totalAmount) {
+                    validationMessageEl.classList.remove('hidden');
+                    return;
+                }
+
+                validationMessageEl.classList.add('hidden');
+
+                const amountOwed = totalAmount - state.newSale.amountPaid;
+                const newSaleItem = {
+                    id: generateUUID(),
+                    ...state.newSale,
+                    totalAmount,
+                    amountOwed,
+                    date: new Date(state.newSale.date),
+                };
+
+                
+                // Lógica de crear o actualizar
+                if (state.editingSaleId) {
+                    const idx = state.sales.findIndex(s => s.id === state.editingSaleId);
+                    if (idx !== -1) {
+                        const prev = state.sales[idx];
+                        prev.items.forEach(item => {
+                            const p = state.products.find(pp => pp.name === item.name);
+                            if (p) p.stock += item.quantity;
+                        });
+                        state.newSale.items.forEach(item => {
+                            const p = state.products.find(pp => pp.name === item.name);
+                            if (p) p.stock -= item.quantity;
+                        });
+                        state.sales[idx] = {
+                            ...prev,
+                            buyerName: state.newSale.buyerName,
+                            date: new Date(state.newSale.date),
+                            items: state.newSale.items.map(it => ({ name: it.name, price: it.price, quantity: it.quantity })),
+                            amountPaid: state.newSale.amountPaid,
+                            paymentType: state.newSale.paymentType,
+                            totalAmount,
+                            amountOwed
+                        };
+                    }
+                    state.editingSaleId = null;
+                } else {
+                    state.products = updatedProducts;
+                    state.sales.push(newSaleItem);
+                }
+                resetNewSaleForm();
+                renderApp();
+    
+            });
+
+            // Event listener para el botón "Añadir Item"
+            document.getElementById('add-item-btn').addEventListener('click', () => {
+                state.newSale.items.push({
+                    name: '',
+                    price: 0,
+                    quantity: 1
+                });
+                renderNewSaleForm();
+            });
+
+            // Event listeners para los items de la venta
+            document.getElementById('sale-items-container').addEventListener('change', (e) => {
+                const target = e.target;
+                if (target.classList.contains('item-name')) {
+                    const index = target.dataset.index;
+                    const productName = target.value;
+                    const product = state.products.find(p => p.name === productName);
+                    if (product) {
+                        state.newSale.items[index].name = product.name;
+                        state.newSale.items[index].price = product.price;
+                    } else {
+                        state.newSale.items[index].name = '';
+                        state.newSale.items[index].price = 0;
+                    }
+                }
+                if (target.classList.contains('item-quantity')) {
+                    const index = target.dataset.index;
+                    state.newSale.items[index].quantity = parseInt(target.value) || 0; // Aseguramos que sea un número
+                }
+                // Vuelve a renderizar el formulario para actualizar el total
+                renderNewSaleForm();
+            });
+
+            document.getElementById('sale-items-container').addEventListener('click', (e) => {
+                if (e.target.closest('.remove-item-btn')) {
+                    const index = e.target.closest('.remove-item-btn').dataset.index;
+                    state.newSale.items.splice(index, 1);
+                    // Vuelve a renderizar el formulario para actualizar el total
+                    renderNewSaleForm();
+                }
+            });
+            
+            // Event listener para el cambio de tipo de pago
+            document.getElementById('payment-type').addEventListener('change', (e) => {
+                state.newSale.paymentType = e.target.value;
+            });
+
+            // Event listener para el botón "Imprimir Reporte"
+            document.getElementById('print-report-btn').addEventListener('click', () => {
+                const monthYearInput = document.getElementById('print-month-year');
+                const [year, month] = monthYearInput.value.split('-').map(Number);
+                if (year && month) {
+                    printReport(month - 1, year); // Los meses en JS son de 0-11
+                } else {
+                    showMessageModal('Error de Impresión', 'Por favor, seleccione un mes y año para imprimir.');
+                }
+            });
+
+            // Event listener para el botón "Limpiar Historial"
+            document.getElementById('clear-sales-btn').addEventListener('click', () => {
+                showClearModal();
+            });
+
+            // Event listeners para el modal de confirmación
+            clearModalConfirmEl.addEventListener('click', () => {
+                state.sales = [];
+                // Se restaura el stock original al limpiar el historial
+                state.products = state.products.map(p => {
+                    return { ...p, stock: p.originalStock || p.stock };
+                });
+                renderApp();
+                hideClearModal();
+            });
+            clearModalCancelEl.addEventListener('click', () => {
+                hideClearModal();
+            });
+            
+            // Event listener para el botón de cerrar el modal de mensajes
+            document.getElementById('message-modal-close').addEventListener('click', () => {
+                hideMessageModal();
+            });
+        });
+    </script>
+<footer class="mt-8 text-center text-gray-500 text-sm">
+<p>Creado por MONKEY para Anita Maria Figueroa.</p>
+</footer>
+<script>
+            // Lógica automática para tipo de venta
+            document.getElementById('payment-type').addEventListener('change', (e) => {
+                const amountPaidEl = document.getElementById('amount-paid');
+                if (e.target.value === 'credito') {
+                    amountPaidEl.value = 0;
+                    amountPaidEl.setAttribute('readonly', true);
+                } else {
+                    amountPaidEl.removeAttribute('readonly');
+                }
+                state.newSale.paymentType = e.target.value;
+            });
+
+            // Imprimir reporte diario
+            function printDailyReport(dayStr) {
+                const date = new Date(dayStr);
+                const sales = state.sales.filter(sale => {
+                    const saleDate = new Date(sale.date);
+                    return saleDate.toDateString() === date.toDateString();
+                });
+
+                const printContainer = document.querySelector('.print-container');
+                printContainer.innerHTML = '';
+
+                if (sales.length === 0) {
+                    showMessageModal('Error de Impresión', 'No hay ventas para la fecha seleccionada.');
+                    return;
+                }
+
+                const header = document.createElement('div');
+                header.className = 'p-8 text-center';
+                header.innerHTML = `
+                    <h1 class="text-4xl font-bold mb-2">Reporte Diario de Ventas</h1>
+                    <h2 class="text-xl text-gray-600 mb-6">Día: ${date.toLocaleDateString()}</h2>
+                `;
+                printContainer.appendChild(header);
+
+                const table = document.createElement('table');
+                table.className = 'table-print-view text-left text-sm';
+                table.innerHTML = \`
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="px-6 py-3">Fecha</th>
+                            <th class="px-6 py-3">Comprador</th>
+                            <th class="px-6 py-3">Productos</th>
+                            <th class="px-6 py-3">Total</th>
+                            <th class="px-6 py-3">Deuda</th>
+                            <th class="px-6 py-3">Tipo de Venta</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                \`;
+
+                const tbody = table.querySelector('tbody');
+                let total = 0;
+                let deuda = 0;
+
+                sales.forEach(sale => {
+                    total += sale.totalAmount;
+                    deuda += sale.amountOwed;
+                    const productsList = sale.items.map(item => \`\${item.name} (\${item.quantity})\`).join(', ');
+                    const paymentTypeMap = {
+                        'contado': 'Contado',
+                        'credito': 'Crédito',
+                        'transferencia': 'Transferencia'
+                    };
+                    const row = document.createElement('tr');
+                    row.innerHTML = \`
+                        <td class="px-6 py-4">\${new Date(sale.date).toLocaleDateString()}</td>
+                        <td class="px-6 py-4">\${sale.buyerName}</td>
+                        <td class="px-6 py-4">\${productsList}</td>
+                        <td class="px-6 py-4">\${formatCurrency(sale.totalAmount)}</td>
+                        <td class="px-6 py-4">\${formatCurrency(sale.amountOwed)}</td>
+                        <td class="px-6 py-4">\${paymentTypeMap[sale.paymentType]}</td>
+                    \`;
+                    tbody.appendChild(row);
+                });
+
+                const summaryRow = document.createElement('tr');
+                summaryRow.className = 'font-bold';
+                summaryRow.innerHTML = \`
+                    <td colspan="3" class="px-6 py-4 text-right">Totales del día:</td>
+                    <td class="px-6 py-4">\${formatCurrency(total)}</td>
+                    <td class="px-6 py-4">\${formatCurrency(deuda)}</td>
+                    <td class="px-6 py-4"></td>
+                \`;
+                tbody.appendChild(summaryRow);
+
+                printContainer.appendChild(table);
+                
+            printContainer.classList.remove('hidden');
+            const finalize = () => { printContainer.classList.add('hidden'); };
+            if (window.matchMedia) {
+                const mq = window.matchMedia('print');
+                const listener = (e) => { if (!e.matches) { finalize(); mq.removeListener(listener);} };
+                mq.addListener(listener);
+            }
+            setTimeout(() => window.print(), 50);
+        
+            }
+
+            document.getElementById('print-daily-report-btn').addEventListener('click', () => {
+                const input = document.getElementById('print-daily-date');
+                if (input.value) {
+                    printDailyReport(input.value);
+                } else {
+                    showMessageModal('Error de Impresión', 'Por favor, seleccione una fecha para imprimir.');
+                }
+            });
+</script><div id='print-container' style='display:none'></div>
+</body>
+</html>
